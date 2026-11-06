@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escalação Ideal do Flamengo - Campeões da Libertadores</title>
+  <style>
+    :root {
+      --verde-campo: #2e7d32;
+      --verde-escuro: #1b5e20;
+      --vermelho: #c62828;
+      --preto: #212121;
+      --branco: #ffffff;
+      --cinza: #f5f5f5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d0a0a 100%);
+      color: var(--branco);
+      min-height: 100vh;
+      padding: 20px 12px 40px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #ff1744, #ff8a80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: #bdbdbd;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.06);
+      padding: 16px;
+      border-radius: 12px;
+    }
+
+    .controls label {
+      font-size: 0.85rem;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .escudo-formacao {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .escudo-formacao img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+
+    select, input[type="text"] {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      background: #2a2a2a;
+      color: white;
+      font-size: 0.95rem;
+      min-width: 160px;
+    }
+
+    select:focus, input:focus {
+      outline: 2px solid var(--vermelho);
+      border-color: transparent;
+    }
+
+    /* Campo */
+    .pitch-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto 24px;
+      aspect-ratio: 2 / 3;
+      background: linear-gradient(to bottom, #388e3c, #2e7d32);
+      border: 4px solid #fff;
+      border-radius: 8px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .pitch-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255,255,255,0.7);
+      transform: translateY(-50%);
+    }
+
+    .pitch-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 90px;
+      height: 90px;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .goal {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40%;
+      height: 8%;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-bottom: none;
+    }
+
+    .goal.top { top: 0; }
+    .goal.bottom { bottom: 0; border-top: none; border-bottom: 2px solid rgba(255,255,255,0.7); }
+
+    .pos {
+      position: absolute;
+      width: 110px;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+    }
+
+    .pos select {
+      width: 100%;
+      font-size: 0.72rem;
+      padding: 5px 4px;
+      background: rgba(0,0,0,0.75);
+      border: 1px solid #ff5252;
+      border-radius: 6px;
+      color: #fff;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .pos .label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-align: center;
+      color: #ffeb3b;
+      margin-bottom: 2px;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    /* Posições 4-3-3 */
+    .f-433 .gk { top: 92%; left: 50%; }
+    .f-433 .ld { top: 78%; left: 82%; }   /* LD = direita do campo */
+    .f-433 .z1 { top: 80%; left: 38%; }
+    .f-433 .z2 { top: 80%; left: 62%; }
+    .f-433 .le { top: 78%; left: 18%; }   /* LE = esquerda do campo */
+    .f-433 .vol1 { top: 60%; left: 28%; }
+    .f-433 .vol2 { top: 58%; left: 50%; }
+    .f-433 .vol3 { top: 60%; left: 72%; }
+    .f-433 .pe { top: 32%; left: 20%; }
+    .f-433 .ca { top: 28%; left: 50%; }
+    .f-433 .pd { top: 32%; left: 80%; }
+
+    /* Posições 4-2-3-1 */
+    .f-4231 .gk { top: 92%; left: 50%; }
+    .f-4231 .ld { top: 78%; left: 82%; }
+    .f-4231 .z1 { top: 80%; left: 38%; }
+    .f-4231 .z2 { top: 80%; left: 62%; }
+    .f-4231 .le { top: 78%; left: 18%; }
+    .f-4231 .vol1 { top: 62%; left: 35%; }
+    .f-4231 .vol2 { top: 62%; left: 65%; }
+    .f-4231 .vol3 { display: none; }
+    .f-4231 .meia { top: 42%; left: 50%; }
+    .f-4231 .pe { top: 35%; left: 18%; }
+    .f-4231 .pd { top: 35%; left: 82%; }
+    .f-4231 .ca { top: 22%; left: 50%; }
+
+    /* Posições 4-4-2 */
+    .f-442 .gk { top: 92%; left: 50%; }
+    .f-442 .ld { top: 78%; left: 82%; }
+    .f-442 .z1 { top: 80%; left: 38%; }
+    .f-442 .z2 { top: 80%; left: 62%; }
+    .f-442 .le { top: 78%; left: 18%; }
+    .f-442 .vol1 { top: 58%; left: 22%; }
+    .f-442 .vol2 { top: 58%; left: 42%; }
+    .f-442 .vol3 { top: 58%; left: 58%; }
+    .f-442 .vol4 { top: 58%; left: 78%; }
+    .f-442 .ca1 { top: 28%; left: 38%; }
+    .f-442 .ca2 { top: 28%; left: 62%; }
+    .f-442 .pe, .f-442 .pd, .f-442 .meia { display: none; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    button {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #d32f2f, #b71c1c);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #424242;
+      color: white;
+    }
+
+    .result {
+      margin-top: 24px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 18px;
+      display: none;
+    }
+
+    .result h3 {
+      margin-bottom: 10px;
+      color: #ff8a80;
+    }
+
+    .result pre {
+      white-space: pre-wrap;
+      font-family: inherit;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #eee;
+    }
+
+    .legend {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #9e9e9e;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 520px) {
+      .pos { width: 92px; }
+      .pos select { font-size: 0.65rem; }
+      header h1 { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔥 Escalação Ideal do Flamengo</h1>
+      <p>Escolha os melhores entre os campeões da Libertadores: 1981 • 2019 • 2022 • 2025</p>
+    </header>
+
+    <div class="controls">
+      <label>
+        Seu nome
+        <input type="text" id="nome" placeholder="Digite seu nome" maxlength="40" />
+      </label>
+      <div class="escudo-formacao">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Flamengo-RJ_%28BRA%29.png/120px-Flamengo-RJ_%28BRA%29.png" 
+             alt="Escudo do Flamengo" 
+             onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Logo_Flamengo_crest_1980-2018.png/120px-Logo_Flamengo_crest_1980-2018.png'" />
+        <label>
+          Formação
+          <select id="formacao">
+            <option value="433" selected>4-3-3</option>
+            <option value="4231">4-2-3-1</option>
+            <option value="442">4-4-2</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="pitch-wrapper f-433" id="campo">
+      <div class="goal top"></div>
+      <div class="goal bottom"></div>
+
+      <!-- Goleiro -->
+      <div class="pos gk">
+        <span class="label">GOL</span>
+        <select data-pos="GOL"></select>
+      </div>
+
+      <!-- Defesa -->
+      <div class="pos ld">
+        <span class="label">LD</span>
+        <select data-pos="LD"></select>
+      </div>
+      <div class="pos z1">
+        <span class="label">ZAG</span>
+        <select data-pos="ZAG1"></select>
+      </div>
+      <div class="pos z2">
+        <span class="label">ZAG</span>
+        <select data-pos="ZAG2"></select>
+      </div>
+      <div class="pos le">
+        <span class="label">LE</span>
+        <select data-pos="LE"></select>
+      </div>
+
+      <!-- Meio -->
+      <div class="pos vol1">
+        <span class="label">VOL</span>
+        <select data-pos="VOL1"></select>
+      </div>
+      <div class="pos vol2">
+        <span class="label">VOL / MEIA</span>
+        <select data-pos="VOL2"></select>
+      </div>
+      <div class="pos vol3">
+        <span class="label">VOL / MEIA</span>
+        <select data-pos="VOL3"></select>
+      </div>
+      <div class="pos vol4" style="display:none">
+        <span class="label">MEIA</span>
+        <select data-pos="VOL4"></select>
+      </div>
+      <div class="pos meia" style="display:none">
+        <span class="label">MEIA</span>
+        <select data-pos="MEIA"></select>
+      </div>
+
+      <!-- Ataque -->
+      <div class="pos pe">
+        <span class="label">PE</span>
+        <select data-pos="PE"></select>
+      </div>
+      <div class="pos ca">
+        <span class="label">CA</span>
+        <select data-pos="CA"></select>
+      </div>
+      <div class="pos pd">
+        <span class="label">PD</span>
+        <select data-pos="PD"></select>
+      </div>
+      <div class="pos ca1" style="display:none">
+        <span class="label">CA</span>
+        <select data-pos="CA1"></select>
+      </div>
+      <div class="pos ca2" style="display:none">
+        <span class="label">CA</span>
+        <select data-pos="CA2"></select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="gerarEscalacao()">Ver minha escalação</button>
+      <button class="btn-secondary" onclick="copiarEscalacao()">Copiar / Compartilhar</button>
+    </div>
+
+    <div class="result" id="resultado">
+      <h3 id="titulo-resultado"></h3>
+      <pre id="texto-resultado"></pre>
+    </div>
+
+    <p class="legend">
+      Jogadores das conquistas da Libertadores: 1981 (Zico), 2019 (Gabigol), 2022 (Pedro) e 2025 (Danilo)
+    </p>
+  </div>
+
+  <script>
+    const jogadores = {
+      GOL: [
+        "Raul (1981)",
+        "Diego Alves (2019)",
+        "Santos (2022)",
+        "Rossi (2025)"
+      ],
+      LD: [
+        "Leandro (1981)",
+        "Rafinha (2019)",
+        "Rodinei (2022)",
+        "Varela (2025)"
+      ],
+      ZAG: [
+        "Marinho (1981)",
+        "Mozer (1981)",
+        "Rodrigo Caio (2019)",
+        "Pablo Marí (2019)",
+        "David Luiz (2022)",
+        "Léo Pereira (2022/2025)",
+        "Danilo (2025)",
+        "Léo Ortiz (2025)"
+      ],
+      LE: [
+        "Júnior (1981)",
+        "Filipe Luís (2019/2022)",
+        "Alex Sandro (2025)",
+        "Ayrton Lucas (2022)"
+      ],
+      VOL: [
+        "Andrade (1981)",
+        "Adílio (1981)",
+        "Willian Arão (2019)",
+        "Gerson (2019)",
+        "Thiago Maia (2022)",
+        "João Gomes (2022)",
+        "Pulgar (2025)",
+        "Jorginho (2025)"
+      ],
+      MEIA: [
+        "Zico (1981)",
+        "Tita (1981)",
+        "Arrascaeta (2019/22/25)",
+        "Everton Ribeiro (2019/22)",
+        "Diego (2019)",
+        "Carrascal (2025)"
+      ],
+      ATA: [
+        "Nunes (1981)",
+        "Lico (1981)",
+        "Gabigol (2019/22)",
+        "Bruno Henrique (2019/22/25)",
+        "Pedro (2022/25)",
+        "Samuel Lino (2025)",
+        "Luiz Araújo (2025)"
+      ]
+    };
+
+    // Mapeamento de posição para lista
+    const mapaListas = {
+      GOL: "GOL",
+      LD: "LD",
+      ZAG1: "ZAG",
+      ZAG2: "ZAG",
+      LE: "LE",
+      VOL1: "VOL",
+      VOL2: "VOL",
+      VOL3: "MEIA",
+      VOL4: "MEIA",
+      MEIA: "MEIA",
+      PE: "ATA",
+      PD: "ATA",
+      CA: "ATA",
+      CA1: "ATA",
+      CA2: "ATA"
+    };
+
+    function preencherSelects() {
+      document.querySelectorAll('.pos select').forEach(sel => {
+        const pos = sel.dataset.pos;
+        const listaKey = mapaListas[pos];
+        const opcoes = jogadores[listaKey] || [];
+        sel.innerHTML = '<option value="">Escolher...</option>';
+        opcoes.forEach(j => {
+          const opt = document.createElement('option');
+          opt.value = j;
+          opt.textContent = j;
+          sel.appendChild(opt);
+        });
+      });
+    }
+
+    function atualizarFormacao() {
+      const form = document.getElementById('formacao').value;
+      const campo = document.getElementById('campo');
+      campo.className = 'pitch-wrapper f-' + form;
+
+      // Controle de visibilidade por formação
+      const show = (cls, yes) => {
+        document.querySelectorAll('.' + cls).forEach(el => {
+          el.style.display = yes ? 'block' : 'none';
+        });
+      };
+
+      if (form === '433') {
+        show('vol3', true);
+        show('vol4', false);
+        show('meia', false);
+        show('pe', true);
+        show('pd', true);
+        show('ca', true);
+        show('ca1', false);
+        show('ca2', false);
+      } else if (form === '4231') {
+        show('vol3', false);
+        show('vol4', false);
+        show('meia', true);
+        show('pe', true);
+        show('pd', true);
+        show('ca', true);
+        show('ca1', false);
+        show('ca2', false);
+      } else if (form === '442') {
+        show('vol3', true);
+        show('vol4', true);
+        show('meia', false);
+        show('pe', false);
+        show('pd', false);
+        show('ca', false);
+        show('ca1', true);
+        show('ca2', true);
+      }
+    }
+
+    function gerarEscalacao() {
+      const nome = document.getElementById('nome').value.trim() || 'Anônimo';
+      const formSelect = document.getElementById('formacao');
+      const formTexto = formSelect.options[formSelect.selectedIndex].text;
+      const form = formSelect.value;
+
+      let linhas = [];
+      const pega = (sel) => {
+        const el = document.querySelector(`select[data-pos="${sel}"]`);
+        return el && el.value ? el.value : '—';
+      };
+
+      if (form === '433') {
+        linhas = [
+          `GOL: ${pega('GOL')}`,
+          `LD: ${pega('LD')}  |  ZAG: ${pega('ZAG1')}  |  ZAG: ${pega('ZAG2')}  |  LE: ${pega('LE')}`,
+          `VOL: ${pega('VOL1')}  |  MEIA: ${pega('VOL2')}  |  MEIA: ${pega('VOL3')}`,
+          `PE: ${pega('PE')}  |  CA: ${pega('CA')}  |  PD: ${pega('PD')}`
+        ];
+      } else if (form === '4231') {
+        linhas = [
+          `GOL: ${pega('GOL')}`,
+          `LD: ${pega('LD')}  |  ZAG: ${pega('ZAG1')}  |  ZAG: ${pega('ZAG2')}  |  LE: ${pega('LE')}`,
+          `VOL: ${pega('VOL1')}  |  VOL: ${pega('VOL2')}`,
+          `PE: ${pega('PE')}  |  MEIA: ${pega('MEIA')}  |  PD: ${pega('PD')}`,
+          `CA: ${pega('CA')}`
+        ];
+      } else {
+        linhas = [
+          `GOL: ${pega('GOL')}`,
+          `LD: ${pega('LD')}  |  ZAG: ${pega('ZAG1')}  |  ZAG: ${pega('ZAG2')}  |  LE: ${pega('LE')}`,
+          `MEIA: ${pega('VOL1')}  |  MEIA: ${pega('VOL2')}  |  MEIA: ${pega('VOL3')}  |  MEIA: ${pega('VOL4')}`,
+          `CA: ${pega('CA1')}  |  CA: ${pega('CA2')}`
+        ];
+      }
+
+      const texto = `🔥 Escalação Ideal do Flamengo\n` +
+                   `Feita por: ${nome}\n` +
+                   `Formação: ${formTexto}\n\n` +
+                   linhas.join('\n') +
+                   `\n\nCampeões da Libertadores: 1981 • 2019 • 2022 • 2025`;
+
+      document.getElementById('titulo-resultado').textContent = `Escalação de ${nome}`;
+      document.getElementById('texto-resultado').textContent = texto;
+      document.getElementById('resultado').style.display = 'block';
+      window.ultimaEscalacao = texto;
+      document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copiarEscalacao() {
+      if (!window.ultimaEscalacao) {
+        gerarEscalacao();
+      }
+      const texto = window.ultimaEscalacao;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Minha Escalação Ideal do Flamengo',
+          text: texto
+        }).catch(() => copiarTexto(texto));
+      } else {
+        copiarTexto(texto);
+      }
+    }
+
+    function copiarTexto(texto) {
+      navigator.clipboard.writeText(texto).then(() => {
+        alert('Escalação copiada! Agora é só colar no WhatsApp, Instagram ou onde quiser.');
+      }).catch(() => {
+        prompt('Copie o texto abaixo:', texto);
+      });
+    }
+
+    // Inicialização
+    preencherSelects();
+    document.getElementById('formacao').addEventListener('change', atualizarFormacao);
+    atualizarFormacao();
+  </script>
+</body>
+</html>
